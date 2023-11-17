@@ -1,0 +1,17 @@
+G:\My Drive\Scripts\Poker\bin\Debug\net6.0-windows\Poker.exe
+G:\My Drive\Scripts\Poker\bin\Debug\net6.0-windows\Poker.deps.json
+G:\My Drive\Scripts\Poker\bin\Debug\net6.0-windows\Poker.runtimeconfig.json
+G:\My Drive\Scripts\Poker\bin\Debug\net6.0-windows\Poker.dll
+G:\My Drive\Scripts\Poker\bin\Debug\net6.0-windows\Poker.pdb
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\Poker.csproj.AssemblyReference.cache
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\Poker.Form1.resources
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\Poker.csproj.GenerateResource.cache
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\Poker.GeneratedMSBuildEditorConfig.editorconfig
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\Poker.AssemblyInfoInputs.cache
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\Poker.AssemblyInfo.cs
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\Poker.csproj.CoreCompileInputs.cache
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\Poker.dll
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\refint\Poker.dll
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\Poker.pdb
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\Poker.genruntimeconfig.cache
+G:\My Drive\Scripts\Poker\obj\Debug\net6.0-windows\ref\Poker.dll
