@@ -18,6 +18,9 @@ console.log("WebSocket Server started listening on port: " + port);
 
 websocketServer.on('request', websocketHandler);
 
+var players = [];
+var currentPlayer = 0;
+
 /**
  * 
  * @param {websocket.request} request
@@ -25,12 +28,32 @@ websocketServer.on('request', websocketHandler);
 function websocketHandler(request) {
     console.log(new Date() + " - " + request.origin + " connected via WebSocket");
 
+    if (request.origin == undefined) {
+        console.log(new Date() + " - " + "Rejected connection due to undefined origin.")
+        request.reject(401);
+        return;
+
+    } else if (!request.origin.startsWith("PokerClient")) {
+        console.log(new Date() + " - " + "Rejected connection due to non-whitelisted origin.")
+        request.reject(403);
+        return;
+    }
+
     var connection = request.accept('', request.origin);
 
-    connection.sendUTF("Hello, You connected to the WebSocket Server");
     connection.on('message', message => {
         if (message.type === 'utf8') {
-            connection.sendUTF("Echo: " + message.utf8Data);
+            console.log(new Date() + " - Message received: " + message.utf8Data);
+
+            var event = JSON.parse(message.utf8Data);
+
+            if (event.Type == "") {
+                // Turn should advance if the player folds or bets
+
+            }
+
+            // Currently just echoes the data back
+//            connection.sendUTF(message.utf8Data);
         }
     });
 }
