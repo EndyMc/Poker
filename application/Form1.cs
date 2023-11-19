@@ -1,5 +1,4 @@
-using Poker.com.endy.poker.application.online;
-using System.Diagnostics;
+using Poker.application.online;
 
 namespace Poker {
     public partial class Form1 : Form {

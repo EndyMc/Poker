@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Poker.com.endy.poker.application {
+namespace Poker.application {
     public class Card {
         public enum CardType {
             Diamond,

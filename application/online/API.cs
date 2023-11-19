@@ -4,7 +4,7 @@ using System.Net.WebSockets;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace Poker.com.endy.poker.application.online {
+namespace Poker.application.online {
     public class API {
         private static Uri BASE_URI = new("ws://localhost:9000");
 
@@ -25,6 +25,7 @@ namespace Poker.com.endy.poker.application.online {
         public static async Task Connect() {
             Debug.WriteLine("Connecting to the websocket at address: " + BASE_URI.ToString());
             WEBSOCKET.Options.SetRequestHeader("origin", "PokerClient (" + PlayerID + ")");
+            WEBSOCKET.Options.SetRequestHeader("player", PlayerID);
             await WEBSOCKET.ConnectAsync(BASE_URI, CancellationToken.None);
             Debug.WriteLine("WebSocket connected");
 
@@ -58,6 +59,8 @@ namespace Poker.com.endy.poker.application.online {
 
             websocketHandler.Name = "WebSocketHandler-Thread";
             websocketHandler.Start();
+
+            Bet(32810);
         }
 
         /// <summary>

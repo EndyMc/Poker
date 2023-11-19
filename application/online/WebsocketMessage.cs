@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Poker.com.endy.poker.application.online {
+namespace Poker.application.online {
     public class WebsocketMessage {
         public String Type { get; }
         public Dictionary<string, string> Data = new();
