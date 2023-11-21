@@ -43,6 +43,7 @@ namespace Poker.application.online {
 
                         string str = Encoding.UTF8.GetString(buffer, 0, result.Count);
                         WebsocketMessage? message = JsonConvert.DeserializeObject<WebsocketMessage>(str);
+
                         // If the WebsocketMessage is null of some reason or the message was sent by this player, then ignore it.
                         if (message == null || message.Data.GetValueOrDefault<string, string>("Player", "") == PlayerID) continue;
 

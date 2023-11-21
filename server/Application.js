@@ -60,8 +60,8 @@ function websocketHandler(request) {
             if (/bet|fold/.test(event.Type)) {
                 // Turn should advance if the player folds or bets
                 currentPlayer = (currentPlayer + 1) % players.length;
-
-                // Relay bet/fold to all players, then the fact that the turn has advanced to a certain player.
+                
+                // Relay bet/fold event to all players, then the fact that the turn has advanced to a certain player.
                 websocketServer.broadcastUTF(message.utf8Data);
                 websocketServer.broadcastUTF(JSON.stringify({ Type: "turn_advanced", Data: { Player: players[currentPlayer] } }));
             } else {
@@ -75,8 +75,11 @@ function websocketHandler(request) {
     connection.on("close", () => {
         console.log(new Date() + " - Connection with " + thisPlayer + " has closed.");
 
+        // Remove the player from the memory
+        websockets[thisPlayer] = undefined;
         players.splice(players.indexOf(thisPlayer), 1);
+
+        // Skip the player if it was their turn
         currentPlayer = players.length == 0 ? 0 : currentPlayer % players.length;
     });
 }
-
