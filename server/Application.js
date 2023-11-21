@@ -2,10 +2,10 @@ var http = require("node:http");
 var websocket = require("websocket");
 
 var port = 9000;
-var server = http.createServer((req, res) => { res.end("You Connected To Http Server"); console.log(new Date() + " - " + req.origin + " connected via HTTP"); });
+var server = http.createServer((req, res) => { res.end("You Connected To HTTP Server, There's Nothing Interesting Here. Connect Over Websocket instead."); console.log(new Date() + " - " + req.origin + " connected via HTTP"); });
 
 server.listen(port, () => {
-    console.log("HTTP Server started listening on port: " + port);
+    console.log("Server started on port: " + port);
 });
 
 
@@ -14,11 +14,10 @@ var websocketServer = new websocket.server({
     autoAcceptConnections: false,
 });
 
-console.log("WebSocket Server started listening on port: " + port);
-
 websocketServer.on('request', websocketHandler);
 
 var players = [];
+var websockets = {};
 var currentPlayer = 0;
 
 /**
@@ -47,6 +46,8 @@ function websocketHandler(request) {
     console.log(new Date() + " - " + request.origin + " connected via WebSocket");
     players.push(thisPlayer);
 
+    websockets[thisPlayer] = connection;
+
     connection.on('message', message => {
         if (message.type === 'utf8') {
             console.log(new Date() + " - Message received from (" + thisPlayer + ", Current: " + players[currentPlayer] + "): " + message.utf8Data);
@@ -59,10 +60,15 @@ function websocketHandler(request) {
             if (/bet|fold/.test(event.Type)) {
                 // Turn should advance if the player folds or bets
                 currentPlayer = (currentPlayer + 1) % players.length;
+
+                // Relay bet/fold to all players, then the fact that the turn has advanced to a certain player.
+                websocketServer.broadcastUTF(message.utf8Data);
+                websocketServer.broadcastUTF(JSON.stringify({ Type: "turn_advanced", Data: { Player: players[currentPlayer] } }));
+            } else {
+                // Relay event to all clients
+                websocketServer.broadcastUTF(message.utf8Data);
             }
 
-            // Relay event to all clients
-            websocketServer.broadcastUTF(message.utf8Data);
         }
     });
 
