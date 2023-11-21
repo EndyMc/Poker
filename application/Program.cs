@@ -1,3 +1,5 @@
+using Poker.application.online;
+
 namespace Poker {
     internal static class Program {
         /// <summary>
@@ -5,6 +7,8 @@ namespace Poker {
         /// </summary>
         [STAThread]
         static void Main() {
+            API.Connect().Wait();
+
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();

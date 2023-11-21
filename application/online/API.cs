@@ -59,8 +59,6 @@ namespace Poker.application.online {
 
             websocketHandler.Name = "WebSocketHandler-Thread";
             websocketHandler.Start();
-
-            Bet(32810);
         }
 
         /// <summary>
