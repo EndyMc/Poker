@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 using Newtonsoft.Json;
@@ -23,12 +24,15 @@ namespace Poker.application.online {
         /// Connect to the websocket server. This also sets up the eventhandler which is in charge of handling messages from the server and distributing them to the rest of the application.
         /// </summary>
         public static async Task Connect() {
-            Debug.WriteLine("Connecting to the websocket at address: " + BASE_URI.ToString());
-            WEBSOCKET.Options.SetRequestHeader("origin", "PokerClient (" + PlayerID + ")");
-            WEBSOCKET.Options.SetRequestHeader("player", PlayerID);
-            await WEBSOCKET.ConnectAsync(BASE_URI, CancellationToken.None);
-            Debug.WriteLine("WebSocket connected");
-
+            try {
+                Debug.WriteLine("Connecting to the websocket at address: " + BASE_URI.ToString());
+                WEBSOCKET.Options.SetRequestHeader("origin", "PokerClient (" + PlayerID + ")");
+                WEBSOCKET.Options.SetRequestHeader("player", PlayerID);
+                await WEBSOCKET.ConnectAsync(BASE_URI, CancellationToken.None);
+                Debug.WriteLine("WebSocket connected");
+            } catch(Exception ex) {
+                Debug.WriteLine(ex.Message);
+            }
 
             Thread websocketHandler = new(async () => {
                 try {
@@ -46,8 +50,12 @@ namespace Poker.application.online {
 
                         // If the WebsocketMessage is null of some reason or the message was sent by this player, then ignore it.
                         if (message == null || message.Data.GetValueOrDefault<string, string>("Player", "") == PlayerID) continue;
-
                         Debug.WriteLine("Received: " + message);
+
+                        if (message.Type == "close") {
+                            OnWebsocketClose(message);
+                            break;
+                        }
 
                         WEBSOCKET_MESSAGES.Enqueue(message);
                         INCOMING_MESSAGE_EVENT.Set();
@@ -102,6 +110,16 @@ namespace Poker.application.online {
             byte[] buffer = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
 
             await WEBSOCKET.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
+        private static void OnWebsocketClose(WebsocketMessage message) {
+            // Was disconnected from server, this can be either because:
+            // * Duplicate name,
+            // * Other unknown error
+
+            // That should be returned to the user.
+            MessageBox.Show(message.Data.GetValueOrDefault<string, string>("Reason", "Unknown network-error encountered"));
+            Environment.Exit(0);
         }
     }
 }

@@ -36,15 +36,26 @@ function websocketHandler(request) {
         console.log(new Date() + " - " + request.origin + " rejected connection due to non-whitelisted origin.")
         request.reject(403);
         return;
-    } else if (thisPlayer == undefined || players.includes(thisPlayer)) {
-        console.log(new Date() + " - " + request.origin + " rejected connection due to duplicate or non-existent name.")
-        request.reject();
-        return;
     }
 
     var connection = request.accept('', request.origin);
+    if (thisPlayer == undefined || players.includes(thisPlayer)) {
+        console.log(new Date() + " - " + request.origin + " rejected connection due to duplicate or non-existent name.")
+        connection.sendUTF(JSON.stringify({ Type: "close", Data: { Code: 1201, Reason: "You have the same name as another player." } }));
+        connection.close();
+        return;
+    }
+
     console.log(new Date() + " - " + request.origin + " connected via WebSocket");
     players.push(thisPlayer);
+    connection.sendUTF(JSON.stringify({
+        Type: "connect_data",
+        Data: {
+            Index: players.indexOf(thisPlayer),
+
+        }
+
+    }))
 
     websockets[thisPlayer] = connection;
 
