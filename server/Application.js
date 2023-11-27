@@ -92,5 +92,23 @@ function websocketHandler(request) {
 
         // Skip the player if it was their turn
         currentPlayer = players.length == 0 ? 0 : currentPlayer % players.length;
+
+        if (player.length == 0) {
+            // If there are no players in the lobby,
+            // then there's no point in sending out any
+            // events
+            return;
+        }
+
+        // Tell all clients that someone left to make them delete that player from their board.
+        websocketServer.broadcastUTF(JSON.stringify({
+            Type: "player_left",
+            Data: {
+                Player: thisPlayer
+            }
+        }));
+
+        // Advance the turn to the next player if it was their turn when they left
+        websocketServer.broadcastUTF(JSON.stringify({ Type: "turn_advanced", Data: { Player: players[currentPlayer] } }));
     });
 }
