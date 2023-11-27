@@ -24,15 +24,28 @@ namespace Poker.application.online {
         /// Connect to the websocket server. This also sets up the eventhandler which is in charge of handling messages from the server and distributing them to the rest of the application.
         /// </summary>
         public static async Task Connect() {
+            Debug.WriteLine("Connecting to the websocket at address: " + BASE_URI.ToString());
+
+            WEBSOCKET.Options.SetRequestHeader("origin", "PokerClient (" + PlayerID + ")");
+            WEBSOCKET.Options.SetRequestHeader("player", PlayerID);
+
             try {
-                Debug.WriteLine("Connecting to the websocket at address: " + BASE_URI.ToString());
-                WEBSOCKET.Options.SetRequestHeader("origin", "PokerClient (" + PlayerID + ")");
-                WEBSOCKET.Options.SetRequestHeader("player", PlayerID);
                 await WEBSOCKET.ConnectAsync(BASE_URI, CancellationToken.None);
-                Debug.WriteLine("WebSocket connected");
             } catch(Exception ex) {
+                // There should an exception (or three) thrown when
+                // the websocket is unable to connect, due to the
+                // server not responding.
+
+                Debug.WriteLine("WebSocket unable to connect (Did you forget to start the server?)");
                 Debug.WriteLine(ex.Message);
+
+                MessageBox.Show("Unable to connect to the network", "Network Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+
+                return;
             }
+
+            Debug.WriteLine("WebSocket connected");
 
             Thread websocketHandler = new(async () => {
                 try {
@@ -118,7 +131,7 @@ namespace Poker.application.online {
             // * Other unknown error
 
             // That should be returned to the user.
-            MessageBox.Show(message.Data.GetValueOrDefault<string, string>("Reason", "Unknown network-error encountered"));
+            MessageBox.Show(message.Data.GetValueOrDefault<string, string>("Reason", "Unknown network-error encountered"), "Network Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             Environment.Exit(0);
         }
     }
