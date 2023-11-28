@@ -93,7 +93,7 @@ function websocketHandler(request) {
         // Skip the player if it was their turn
         currentPlayer = players.length == 0 ? 0 : currentPlayer % players.length;
 
-        if (player.length == 0) {
+        if (players.length == 0) {
             // If there are no players in the lobby,
             // then there's no point in sending out any
             // events
