@@ -62,7 +62,7 @@ namespace Poker.application.online {
                         WebsocketMessage? message = JsonConvert.DeserializeObject<WebsocketMessage>(str);
 
                         // If the WebsocketMessage is null of some reason or the message was sent by this player, then ignore it.
-                        if (message == null || message.Data.GetValueOrDefault<string, string>("Player", "") == PlayerID) continue;
+                        if (message == null || (string) message.Data.GetValueOrDefault<string, object>("Player", "") == PlayerID) continue;
                         Debug.WriteLine("Received: " + message);
 
                         if (message.Type == "close") {
@@ -103,7 +103,6 @@ namespace Poker.application.online {
             // * Go all in. Which has some special rules, such as they not being able to win more than what they bet and that they aren't forced to bet again, since they don't have the money for it. If all players are all in (or have bet the same as the player which is all in and cannot raise it any further), the cards are all face up with no more bets being made.
 
             WebsocketMessage message = new("bet");
-            message.Data.Add("Player", PlayerID);
             message.Data.Add("BetAmount", "" + amount);
 
             byte[] buffer = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
@@ -118,7 +117,6 @@ namespace Poker.application.online {
         /// </summary>
         public static async Task Fold() {
             WebsocketMessage message = new("fold");
-            message.Data.Add("Player", PlayerID);
 
             byte[] buffer = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
 
@@ -131,7 +129,7 @@ namespace Poker.application.online {
             // * Other unknown error
 
             // That should be returned to the user.
-            MessageBox.Show(message.Data.GetValueOrDefault<string, string>("Reason", "Unknown network-error encountered"), "Network Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show((string) message.Data.GetValueOrDefault<string, object>("Reason", "Unknown network-error encountered"), "Network Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             Environment.Exit(0);
         }
     }
