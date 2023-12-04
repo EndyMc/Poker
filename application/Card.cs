@@ -20,6 +20,25 @@ namespace Poker.application {
             this.Suite = suite;
         }
 
+        public string GetSuiteAsString() {
+            switch(this.Suite) {
+                case CardType.Diamond:
+                    return "D";
+                case CardType.Heart:
+                    return "H";
+                case CardType.Spade:
+                    return "S";
+                case CardType.Clover:
+                    return "C";
+                default:
+                    return "Err";
+            }
+        }
+
+        public string ToFilepath(string? basePath) {
+            return (basePath != null ? Path.Combine(basePath, GetSuiteAsString() + this.Value) : (GetSuiteAsString() + this.Value)) + ".png";
+        }
+
         public override string ToString() {
             return JsonConvert.SerializeObject(this);
         }

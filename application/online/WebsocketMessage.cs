@@ -3,7 +3,7 @@
 namespace Poker.application.online {
     public class WebsocketMessage {
         public String Type { get; }
-        public Dictionary<string, string> Data = new();
+        public Dictionary<string, object> Data = new();
 
         public WebsocketMessage(String type) {
             this.Type = type;
