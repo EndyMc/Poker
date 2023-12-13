@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 using Newtonsoft.Json;
@@ -24,11 +25,27 @@ namespace Poker.application.online {
         /// </summary>
         public static async Task Connect() {
             Debug.WriteLine("Connecting to the websocket at address: " + BASE_URI.ToString());
+
             WEBSOCKET.Options.SetRequestHeader("origin", "PokerClient (" + PlayerID + ")");
             WEBSOCKET.Options.SetRequestHeader("player", PlayerID);
-            await WEBSOCKET.ConnectAsync(BASE_URI, CancellationToken.None);
-            Debug.WriteLine("WebSocket connected");
 
+            try {
+                await WEBSOCKET.ConnectAsync(BASE_URI, CancellationToken.None);
+            } catch(Exception ex) {
+                // There should an exception (or three) thrown when
+                // the websocket is unable to connect, due to the
+                // server not responding.
+
+                Debug.WriteLine("WebSocket unable to connect (Did you forget to start the server?)");
+                Debug.WriteLine(ex.Message);
+
+                MessageBox.Show("Unable to connect to the network", "Network Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+
+                return;
+            }
+
+            Debug.WriteLine("WebSocket connected");
 
             Thread websocketHandler = new(async () => {
                 try {
@@ -43,10 +60,15 @@ namespace Poker.application.online {
 
                         string str = Encoding.UTF8.GetString(buffer, 0, result.Count);
                         WebsocketMessage? message = JsonConvert.DeserializeObject<WebsocketMessage>(str);
-                        // If the WebsocketMessage is null of some reason or the message was sent by this player, then ignore it.
-                        if (message == null || message.Data.GetValueOrDefault<string, string>("Player", "") == PlayerID) continue;
 
+                        // If the WebsocketMessage is null of some reason or the message was sent by this player, then ignore it.
+                        if (message == null || (string) message.Data.GetValueOrDefault<string, object>("Player", "") == PlayerID) continue;
                         Debug.WriteLine("Received: " + message);
+
+                        if (message.Type == "close") {
+                            OnWebsocketClose(message);
+                            break;
+                        }
 
                         WEBSOCKET_MESSAGES.Enqueue(message);
                         INCOMING_MESSAGE_EVENT.Set();
@@ -81,7 +103,6 @@ namespace Poker.application.online {
             // * Go all in. Which has some special rules, such as they not being able to win more than what they bet and that they aren't forced to bet again, since they don't have the money for it. If all players are all in (or have bet the same as the player which is all in and cannot raise it any further), the cards are all face up with no more bets being made.
 
             WebsocketMessage message = new("bet");
-            message.Data.Add("Player", PlayerID);
             message.Data.Add("BetAmount", "" + amount);
 
             byte[] buffer = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
@@ -96,11 +117,20 @@ namespace Poker.application.online {
         /// </summary>
         public static async Task Fold() {
             WebsocketMessage message = new("fold");
-            message.Data.Add("Player", PlayerID);
 
             byte[] buffer = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
 
             await WEBSOCKET.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
+        private static void OnWebsocketClose(WebsocketMessage message) {
+            // Was disconnected from server, this can be either because:
+            // * Duplicate name,
+            // * Other unknown error
+
+            // That should be returned to the user.
+            MessageBox.Show((string) message.Data.GetValueOrDefault<string, object>("Reason", "Unknown network-error encountered"), "Network Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Environment.Exit(0);
         }
     }
 }
